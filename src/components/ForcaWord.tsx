@@ -22,6 +22,7 @@ export default function ForcaWord({
 		>
 			{wordToGuess.split("").map((letter, index) => (
 				<div
+					key={index}
 					style={{
 						borderBottom: "4px solid black",
 						width: "1em",
@@ -29,7 +30,6 @@ export default function ForcaWord({
 					}}
 				>
 					<span
-						key={index}
 						style={{
 							borderBottom: "4px solid black",
 							width: "1em",
