@@ -22,7 +22,7 @@ function App() {
 		(letter) => !wordToGuess.includes(letter)
 	);
 
-	const isLoser = incorrectLetters.length >= 6;
+	const isLoser = incorrectLetters.length >= 8;
 	const isWinner = wordToGuess
 		.split("")
 		.every((letter) => guessedLetters.includes(letter));
