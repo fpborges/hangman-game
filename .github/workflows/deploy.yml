@@ -45,6 +45,7 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
+          VITE_BASE_URL: /hangman-game
           
       - name: Setup Pages
         uses: actions/configure-pages@v4
