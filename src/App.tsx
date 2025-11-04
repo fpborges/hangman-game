@@ -9,8 +9,11 @@ import "./App.css";
 type Categories = keyof WordCategories;
 
 function getWordAndCategory() {
+	console.log('wordCategoriesList:', wordCategoriesList);
 	const categories = wordCategoriesList as WordCategories;
+	console.log('categories:', categories);
 	const allWords = Object.values(categories).flat();
+	console.log('allWords:', allWords);
 	const randomIndex = Math.floor(Math.random() * allWords.length);
 	const randomWord = allWords[randomIndex].toUpperCase();
 
