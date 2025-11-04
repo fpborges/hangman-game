@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
-// import words from "./wordList.json";
 import wordCategoriesList from "./wordCategoriesList.json";
+import type { WordCategories } from "./types";
 import ForcaDrawing from "./components/ForcaDrawing";
 import ForcaWord from "./components/ForcaWord";
 import ForcaKeyboard from "./components/ForcaKeyboard";
 import "./App.css";
 
-type Categories = keyof typeof wordCategoriesList;
+type Categories = keyof WordCategories;
 
 function getWordAndCategory() {
 	const allWords = Object.values(wordCategoriesList).flat();
