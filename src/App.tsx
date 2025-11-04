@@ -26,6 +26,8 @@ function App() {
 	const [{ word: wordToGuess, category }, setGameState] = useState(() => {
 		return getWordAndCategory();
 	});
+	
+	const wordToGuess = gameState.word;
 
 	const [guessedLetters, setGuessedLetters] = useState<string[]>([]);
 	const incorrectLetters = guessedLetters.filter(
@@ -95,6 +97,7 @@ function App() {
 					</div>
 				)}
 				<div style={{ fontSize: "2rem", textAlign: "center" }}>
+					<div>Categoria: {gameState.category}</div>
 					{isWinner && "Parabéns! Você ganhou!"}
 					{isLoser && `Que pena! A palavra era: ${wordToGuess}`}
 				</div>
