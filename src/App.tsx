@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
-// import words from "./wordList.json";
-import wordCategoriesList from "./wordCategoriesList.json";
+import words from "./wordList.json";
+// import wordCategoriesList from "./wordCategoriesList.json";s
 import ForcaDrawing from "./components/ForcaDrawing";
 import ForcaWord from "./components/ForcaWord";
 import ForcaKeyboard from "./components/ForcaKeyboard";
 import "./App.css";
 
 function getWord() {
-	const newWords = Object.values(wordCategoriesList).flat();
-	const randomIndex = Math.floor(Math.random() * newWords.length);
-	return newWords[randomIndex].toUpperCase();
+	// const newWords = Object.values(wordCategoriesList).flat();
+	const randomIndex = Math.floor(Math.random() * words.length);
+	return words[randomIndex].toUpperCase();
 }
 
 function App() {
