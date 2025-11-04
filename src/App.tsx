@@ -1,33 +1,30 @@
 import { useState, useEffect, useCallback } from "react";
-import categories from "./wordCategoriesList.json";
+import wordCategoriesList from "./wordCategoriesList.json";
+import type { WordCategories } from "./types";
 import ForcaDrawing from "./components/ForcaDrawing";
 import ForcaWord from "./components/ForcaWord";
 import ForcaKeyboard from "./components/ForcaKeyboard";
 import "./App.css";
 
-function getRandomWord(category?: string) {
-    // If no category is provided, get a random category
-    if (!category) {
-        const allCategories = Object.keys(categories);
-        const randomCategoryIndex = Math.floor(Math.random() * allCategories.length);
-        category = allCategories[randomCategoryIndex];
-    }
-    
-    // Get words from the selected category
-    const words = categories[category as keyof typeof categories];
-    const randomIndex = Math.floor(Math.random() * words.length);
-    
-    return {
-        word: words[randomIndex].toUpperCase(),
-        category: category
-    };
+type Categories = keyof WordCategories;
+
+function getWordAndCategory() {
+	const categories = wordCategoriesList[0] as WordCategories;
+	const allWords = Object.values(categories).flat();
+	const randomIndex = Math.floor(Math.random() * allWords.length);
+	const randomWord = allWords[randomIndex].toUpperCase();
+
+	const categoryKeys = Object.keys(categories) as Categories[];
+	const category = categoryKeys.find((cat) =>
+		categories[cat].includes(randomWord.toLowerCase())
+	);
+
+	return { word: randomWord, category: category };
 }
 
 function App() {
-	// Estado para a palavra a ser adivinhada e sua categoria
-	const [gameState, setGameState] = useState(() => {
-		// Seleciona uma palavra aleatória e sua categoria
-		return getRandomWord();
+	const [{ word: wordToGuess, category }, setGameState] = useState(() => {
+		return getWordAndCategory();
 	});
 	
 	const wordToGuess = gameState.word;
@@ -40,7 +37,7 @@ function App() {
 	const isLoser = incorrectLetters.length >= 6;
 	const isWinner = wordToGuess
 		.split("")
-		.every((letter) => guessedLetters.includes(letter));
+		.every((letter: string) => guessedLetters.includes(letter));
 
 	useEffect(() => {
 		if (isWinner) alert("Parabéns! Você ganhou!");
@@ -54,14 +51,22 @@ function App() {
 		[guessedLetters, isWinner, isLoser]
 	);
 
-	// Adiciona um listener para capturar as teclas pressionadas
-
 	useEffect(() => {
 		const handler = (e: KeyboardEvent) => {
-			const key = e.key.toUpperCase();
-			if (!key.match(/^[A-Z]$/)) return;
-			e.preventDefault();
-			addGuessedLetter(key);
+			const key = e.key;
+			const upperKey = key.toUpperCase();
+			if (key === "Enter") {
+				e.preventDefault();
+				setGuessedLetters([]);
+				setGameState(getWordAndCategory());
+				console.log("New Game Started");
+				return;
+			}
+			if (upperKey.match(/^[A-Z]$/)) {
+				e.preventDefault();
+				addGuessedLetter(upperKey);
+				return;
+			}
 		};
 		document.addEventListener("keypress", handler);
 
@@ -69,21 +74,6 @@ function App() {
 			document.removeEventListener("keypress", handler);
 		};
 	}, [guessedLetters]);
-
-	useEffect(() => {
-		const handler = (e: KeyboardEvent) => {
-			const key = e.key;
-			if (key !== "Enter") return;
-			e.preventDefault();
-			setGuessedLetters([]);
-			setGameState(getRandomWord());
-		};
-		document.addEventListener("keypress", handler);
-
-		return () => {
-			document.removeEventListener("keypress", handler);
-		};
-	}, []);
 
 	return (
 		<main>
@@ -98,10 +88,36 @@ function App() {
 					alignItems: "center",
 				}}
 			>
+				{!isWinner && (
+					<div
+						className="wordCategory"
+						style={{ fontSize: "1.5rem", fontWeight: "bold" }}
+					>
+						Word Category to Guess: {category?.toUpperCase() || "UNKNOWN"}
+					</div>
+				)}
 				<div style={{ fontSize: "2rem", textAlign: "center" }}>
 					<div>Categoria: {gameState.category}</div>
 					{isWinner && "Parabéns! Você ganhou!"}
 					{isLoser && `Que pena! A palavra era: ${wordToGuess}`}
+				</div>
+				<div style={{ fontSize: "1.5rem", textAlign: "center" }}>
+					<button
+						style={{
+							backgroundColor: "#4CAF50",
+							color: "white",
+							padding: "10px 20px",
+							border: "none",
+							borderRadius: "5px",
+							cursor: "pointer",
+						}}
+						onClick={() => {
+							setGuessedLetters([]);
+							setGameState(getWordAndCategory());
+						}}
+					>
+						Play New Game or Press Enter
+					</button>
 				</div>
 				<ForcaDrawing numberOfGuesses={incorrectLetters.length} />
 				<ForcaWord

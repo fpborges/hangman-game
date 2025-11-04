@@ -2,6 +2,7 @@
   "name": "forca",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://fpborges.github.io/hangman-game/",
   "type": "module",
   "scripts": {
     "dev": "vite",
