@@ -22,7 +22,7 @@ function App() {
 		(letter) => !wordToGuess.includes(letter)
 	);
 
-	const isLoser = incorrectLetters.length >= 8;
+	const isLoser = incorrectLetters.length >= 6;
 	const isWinner = wordToGuess
 		.split("")
 		.every((letter) => guessedLetters.includes(letter));
@@ -40,13 +40,23 @@ function App() {
 	);
 
 	// Adiciona um listener para capturar as teclas pressionadas
-
 	useEffect(() => {
 		const handler = (e: KeyboardEvent) => {
-			const key = e.key.toUpperCase();
-			if (!key.match(/^[A-Z]$/)) return;
-			e.preventDefault();
-			addGuessedLetter(key);
+			const key = e.key;
+			const upperKey = key.toUpperCase();
+			if (key === "Enter") {
+				e.preventDefault();
+				setGuessedLetters([]);
+				setWordToGuess(getWord());
+				console.log("New Game Started");
+				return;
+			}
+			if (upperKey.match(/^[A-Z]$/)) {
+				e.preventDefault();
+				addGuessedLetter(upperKey);
+				console.log(`Key Pressed: ${upperKey}`);
+				return;
+			}
 		};
 		document.addEventListener("keypress", handler);
 
@@ -54,21 +64,6 @@ function App() {
 			document.removeEventListener("keypress", handler);
 		};
 	}, [guessedLetters]);
-
-	useEffect(() => {
-		const handler = (e: KeyboardEvent) => {
-			const key = e.key;
-			if (key !== "Enter") return;
-			e.preventDefault();
-			setGuessedLetters([]);
-			setWordToGuess(getWord());
-		};
-		document.addEventListener("keypress", handler);
-
-		return () => {
-			document.removeEventListener("keypress", handler);
-		};
-	}, []);
 
 	return (
 		<main>
@@ -86,6 +81,24 @@ function App() {
 				<div style={{ fontSize: "2rem", textAlign: "center" }}>
 					{isWinner && "Parabéns! Você ganhou!"}
 					{isLoser && `Que pena! A palavra era: ${wordToGuess}`}
+				</div>
+				<div style={{ fontSize: "1.5rem", textAlign: "center" }}>
+					<button
+						style={{
+							backgroundColor: "#4CAF50",
+							color: "white",
+							padding: "10px 20px",
+							border: "none",
+							borderRadius: "5px",
+							cursor: "pointer",
+						}}
+						onClick={() => {
+							setGuessedLetters([]);
+							setWordToGuess(getWord());
+						}}
+					>
+						Play New Game or Press Enter
+					</button>
 				</div>
 				<ForcaDrawing numberOfGuesses={incorrectLetters.length} />
 				<ForcaWord
