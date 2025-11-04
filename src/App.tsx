@@ -9,13 +9,14 @@ import "./App.css";
 type Categories = keyof WordCategories;
 
 function getWordAndCategory() {
-	const allWords = Object.values(wordCategoriesList).flat();
+	const categories = wordCategoriesList[0] as WordCategories;
+	const allWords = Object.values(categories).flat();
 	const randomIndex = Math.floor(Math.random() * allWords.length);
 	const randomWord = allWords[randomIndex].toUpperCase();
 
-	const categories = Object.keys(wordCategoriesList) as Categories[];
-	const category = categories.find((cat) =>
-		wordCategoriesList[cat].includes(randomWord.toLowerCase())
+	const categoryKeys = Object.keys(categories) as Categories[];
+	const category = categoryKeys.find((cat) =>
+		categories[cat].includes(randomWord.toLowerCase())
 	);
 
 	return { word: randomWord, category: category };
@@ -34,7 +35,7 @@ function App() {
 	const isLoser = incorrectLetters.length >= 6;
 	const isWinner = wordToGuess
 		.split("")
-		.every((letter) => guessedLetters.includes(letter));
+		.every((letter: string) => guessedLetters.includes(letter));
 
 	useEffect(() => {
 		if (isWinner) alert("Parabéns! Você ganhou!");

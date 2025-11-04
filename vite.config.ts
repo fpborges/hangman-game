@@ -4,9 +4,5 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   base: '/hangman-game/',
-  plugins: [react()],
-  assetsInclude: ['**/*.json'],
-  optimizeDeps: {
-    include: ['wordCategoriesList.json']
-  }
+  plugins: [react()]
 })
