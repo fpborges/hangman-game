@@ -6,12 +6,14 @@ import ForcaWord from "./components/ForcaWord";
 import ForcaKeyboard from "./components/ForcaKeyboard";
 import "./App.css";
 
+type Categories = keyof typeof wordCategoriesList;
+
 function getWordAndCategory() {
 	const allWords = Object.values(wordCategoriesList).flat();
 	const randomIndex = Math.floor(Math.random() * allWords.length);
 	const randomWord = allWords[randomIndex].toUpperCase();
 
-	const categories = Object.keys(wordCategoriesList);
+	const categories = Object.keys(wordCategoriesList) as Categories[];
 	const category = categories.find((cat) =>
 		wordCategoriesList[cat].includes(randomWord.toLowerCase())
 	);
