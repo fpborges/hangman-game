@@ -33,11 +33,9 @@ function App() {
 	);
 
 	const isLoser = incorrectLetters.length >= 6;
-	const isWinner = wordToGuess
-		.split("")
-		.every((letter) => guessedLetters.includes(letter));
-
-	useEffect(() => {
+  const isWinner = wordToGuess
+    .split("")
+    .every((letter: string) => guessedLetters.includes(letter));	useEffect(() => {
 		if (isWinner) alert("Parabéns! Você ganhou!");
 	}, [isWinner]);
 
@@ -63,7 +61,7 @@ function App() {
 		return () => {
 			document.removeEventListener("keypress", handler);
 		};
-	}, [guessedLetters]);
+	}, [guessedLetters, addGuessedLetter]);
 
 	useEffect(() => {
 		const handler = (e: KeyboardEvent) => {
