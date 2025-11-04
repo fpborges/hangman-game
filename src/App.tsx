@@ -1,20 +1,27 @@
 import { useState, useEffect, useCallback } from "react";
-import words from "./wordList.json";
+// import words from "./wordList.json";
+import wordCategoriesList from "./wordCategoriesList.json";
 import ForcaDrawing from "./components/ForcaDrawing";
 import ForcaWord from "./components/ForcaWord";
 import ForcaKeyboard from "./components/ForcaKeyboard";
 import "./App.css";
 
-function getWord() {
-	const randomIndex = Math.floor(Math.random() * words.length);
-	return words[randomIndex].toUpperCase();
+function getWordAndCategory() {
+	const allWords = Object.values(wordCategoriesList).flat();
+	const randomIndex = Math.floor(Math.random() * allWords.length);
+	const randomWord = allWords[randomIndex].toUpperCase();
+
+	const categories = Object.keys(wordCategoriesList);
+	const category = categories.find((cat) =>
+		wordCategoriesList[cat].includes(randomWord.toLowerCase())
+	);
+
+	return { word: randomWord, category: category };
 }
 
 function App() {
-	// Estado para a palavra a ser adivinhada
-	const [wordToGuess, setWordToGuess] = useState(() => {
-		// Seleciona uma palavra aleatória da lista
-		return getWord();
+	const [{ word: wordToGuess, category }, setGameState] = useState(() => {
+		return getWordAndCategory();
 	});
 
 	const [guessedLetters, setGuessedLetters] = useState<string[]>([]);
@@ -39,7 +46,6 @@ function App() {
 		[guessedLetters, isWinner, isLoser]
 	);
 
-	// Adiciona um listener para capturar as teclas pressionadas
 	useEffect(() => {
 		const handler = (e: KeyboardEvent) => {
 			const key = e.key;
@@ -47,14 +53,13 @@ function App() {
 			if (key === "Enter") {
 				e.preventDefault();
 				setGuessedLetters([]);
-				setWordToGuess(getWord());
+				setGameState(getWordAndCategory());
 				console.log("New Game Started");
 				return;
 			}
 			if (upperKey.match(/^[A-Z]$/)) {
 				e.preventDefault();
 				addGuessedLetter(upperKey);
-				console.log(`Key Pressed: ${upperKey}`);
 				return;
 			}
 		};
@@ -78,6 +83,14 @@ function App() {
 					alignItems: "center",
 				}}
 			>
+				{!isWinner && (
+					<div
+						className="wordCategory"
+						style={{ fontSize: "1.5rem", fontWeight: "bold" }}
+					>
+						Word Category to Guess: {category?.toUpperCase() || "UNKNOWN"}
+					</div>
+				)}
 				<div style={{ fontSize: "2rem", textAlign: "center" }}>
 					{isWinner && "Parabéns! Você ganhou!"}
 					{isLoser && `Que pena! A palavra era: ${wordToGuess}`}
@@ -94,7 +107,7 @@ function App() {
 						}}
 						onClick={() => {
 							setGuessedLetters([]);
-							setWordToGuess(getWord());
+							setGameState(getWordAndCategory());
 						}}
 					>
 						Play New Game or Press Enter
