@@ -1,33 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
-import wordCategoriesList from "./wordCategoriesList.json";
-import type { WordCategories } from "./types";
+import words from "./wordList.json";
 import ForcaDrawing from "./components/ForcaDrawing";
 import ForcaWord from "./components/ForcaWord";
 import ForcaKeyboard from "./components/ForcaKeyboard";
 import "./App.css";
 
-type Categories = keyof WordCategories;
-
-function getWordAndCategory() {
-	console.log('wordCategoriesList:', wordCategoriesList);
-	const categories = wordCategoriesList as WordCategories;
-	console.log('categories:', categories);
-	const allWords = Object.values(categories).flat();
-	console.log('allWords:', allWords);
-	const randomIndex = Math.floor(Math.random() * allWords.length);
-	const randomWord = allWords[randomIndex].toUpperCase();
-
-	const categoryKeys = Object.keys(categories) as Categories[];
-	const category = categoryKeys.find((cat) =>
-		categories[cat].includes(randomWord.toLowerCase())
-	);
-
-	return { word: randomWord, category: category };
+function getWord() {
+	const randomIndex = Math.floor(Math.random() * words.length);
+	return words[randomIndex].toUpperCase();
 }
 
 function App() {
-	const [{ word: wordToGuess, category }, setGameState] = useState(() => {
-		return getWordAndCategory();
+	// Estado para a palavra a ser adivinhada
+	const [wordToGuess, setWordToGuess] = useState(() => {
+		// Seleciona uma palavra aleatória da lista
+		return getWord();
 	});
 
 	const [guessedLetters, setGuessedLetters] = useState<string[]>([]);
@@ -38,7 +25,7 @@ function App() {
 	const isLoser = incorrectLetters.length >= 6;
 	const isWinner = wordToGuess
 		.split("")
-		.every((letter: string) => guessedLetters.includes(letter));
+		.every((letter) => guessedLetters.includes(letter));
 
 	useEffect(() => {
 		if (isWinner) alert("Parabéns! Você ganhou!");
@@ -52,22 +39,14 @@ function App() {
 		[guessedLetters, isWinner, isLoser]
 	);
 
+	// Adiciona um listener para capturar as teclas pressionadas
+
 	useEffect(() => {
 		const handler = (e: KeyboardEvent) => {
-			const key = e.key;
-			const upperKey = key.toUpperCase();
-			if (key === "Enter") {
-				e.preventDefault();
-				setGuessedLetters([]);
-				setGameState(getWordAndCategory());
-				console.log("New Game Started");
-				return;
-			}
-			if (upperKey.match(/^[A-Z]$/)) {
-				e.preventDefault();
-				addGuessedLetter(upperKey);
-				return;
-			}
+			const key = e.key.toUpperCase();
+			if (!key.match(/^[A-Z]$/)) return;
+			e.preventDefault();
+			addGuessedLetter(key);
 		};
 		document.addEventListener("keypress", handler);
 
@@ -75,6 +54,21 @@ function App() {
 			document.removeEventListener("keypress", handler);
 		};
 	}, [guessedLetters]);
+
+	useEffect(() => {
+		const handler = (e: KeyboardEvent) => {
+			const key = e.key;
+			if (key !== "Enter") return;
+			e.preventDefault();
+			setGuessedLetters([]);
+			setWordToGuess(getWord());
+		};
+		document.addEventListener("keypress", handler);
+
+		return () => {
+			document.removeEventListener("keypress", handler);
+		};
+	}, []);
 
 	return (
 		<main>
@@ -89,35 +83,9 @@ function App() {
 					alignItems: "center",
 				}}
 			>
-				{!isWinner && (
-					<div
-						className="wordCategory"
-						style={{ fontSize: "1.5rem", fontWeight: "bold" }}
-					>
-						Word Category to Guess: {category?.toUpperCase() || "UNKNOWN"}
-					</div>
-				)}
 				<div style={{ fontSize: "2rem", textAlign: "center" }}>
 					{isWinner && "Parabéns! Você ganhou!"}
 					{isLoser && `Que pena! A palavra era: ${wordToGuess}`}
-				</div>
-				<div style={{ fontSize: "1.5rem", textAlign: "center" }}>
-					<button
-						style={{
-							backgroundColor: "#4CAF50",
-							color: "white",
-							padding: "10px 20px",
-							border: "none",
-							borderRadius: "5px",
-							cursor: "pointer",
-						}}
-						onClick={() => {
-							setGuessedLetters([]);
-							setGameState(getWordAndCategory());
-						}}
-					>
-						Play New Game or Press Enter
-					</button>
 				</div>
 				<ForcaDrawing numberOfGuesses={incorrectLetters.length} />
 				<ForcaWord
