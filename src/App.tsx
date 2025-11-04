@@ -1,15 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
-// import words from "./wordList.json";
-import wordCategoriesList from "./wordCategoriesList.json";
+import words from "./wordList.json";
 import ForcaDrawing from "./components/ForcaDrawing";
 import ForcaWord from "./components/ForcaWord";
 import ForcaKeyboard from "./components/ForcaKeyboard";
 import "./App.css";
 
 function getWord() {
-	const newWords = Object.values(wordCategoriesList).flat();
-	const randomIndex = Math.floor(Math.random() * newWords.length);
-	return newWords[randomIndex].toUpperCase();
+	const randomIndex = Math.floor(Math.random() * words.length);
+	return words[randomIndex].toUpperCase();
 }
 
 function App() {
@@ -89,24 +87,6 @@ function App() {
 					{isWinner && "Parabéns! Você ganhou!"}
 					{isLoser && `Que pena! A palavra era: ${wordToGuess}`}
 				</div>
-				{/* <div style={{ fontSize: "1.5rem", textAlign: "center" }}>
-					<button
-						style={{
-							backgroundColor: "#4CAF50",
-							color: "white",
-							padding: "10px 20px",
-							border: "none",
-							borderRadius: "5px",
-							cursor: "pointer",
-						}}
-						onClick={() => {
-							setGuessedLetters([]);
-							setWordToGuess(getWord());
-						}}
-					>
-						Play New Game or Press Enter
-					</button>
-				</div> */}
 				<ForcaDrawing numberOfGuesses={incorrectLetters.length} />
 				<ForcaWord
 					reveal={isLoser}
