@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-// import words from "./wordList.json";
 import wordCategoriesList from "./wordCategoriesList.json";
 import ForcaDrawing from "./components/ForcaDrawing";
 import ForcaWord from "./components/ForcaWord";
@@ -14,16 +13,16 @@ function getWord() {
 
 function App() {
 	const [wordToGuess, setWordToGuess] = useState(() => {
-		// Seleciona uma palavra aleatória da lista
+		// Select a random word at the start of the game
 		return getWord();
 	});
 
-	const [guessedLetters, setGuessedLetters] = useState<string[]>([]);
+	const [guessedLetters, setGuessedLetters] = useState<string[]>([]); // Letters guessed by the player
 	const incorrectLetters = guessedLetters.filter(
 		(letter) => !wordToGuess.includes(letter)
 	);
 
-	const isLoser = incorrectLetters.length >= 6;
+	const isLoser = incorrectLetters.length >= 6; // Maximum of 6 incorrect guesses
 	const isWinner = wordToGuess
 		.split("")
 		.every((letter) => guessedLetters.includes(letter));
@@ -40,8 +39,15 @@ function App() {
 		[guessedLetters, isWinner, isLoser]
 	);
 
-	// Adiciona um listener para capturar as teclas pressionadas
+	const wordCategory = (randomWord: string) => {
+		return Object.keys(wordCategoriesList).find((category) =>
+			wordCategoriesList[category].includes(randomWord.toLowerCase())
+		);
+	};
 
+	const currentWordCategory = wordCategory(wordToGuess).toUpperCase();
+
+	// Add a listener for keyboard events
 	useEffect(() => {
 		const handler = (e: KeyboardEvent) => {
 			const key = e.key.toUpperCase();
@@ -78,12 +84,23 @@ function App() {
 					maxWidth: "800px",
 					display: "flex",
 					flexDirection: "column",
-					margin: "0 auto",
-					gap: "2rem",
+					margin: "2% auto",
+					gap: "1rem",
 					textAlign: "center",
 					alignItems: "center",
 				}}
 			>
+				<div>
+					{!isWinner && !isLoser && (
+						<div style={{ fontSize: "1.5rem", textAlign: "center" }}>
+							Press a keyboard key to guess a letter
+							<p>
+								The word category is:
+								<strong> {currentWordCategory}</strong>
+							</p>
+						</div>
+					)}
+				</div>
 				<div style={{ fontSize: "2rem", textAlign: "center" }}>
 					{isWinner && "Parabéns! Você ganhou!"}
 					{isLoser && `Que pena! A palavra era: ${wordToGuess}`}
