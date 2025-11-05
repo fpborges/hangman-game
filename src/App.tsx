@@ -1,12 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import wordCategoriesList from "./wordCategoriesList.json";
+import type { WordCategories } from "./types";
 import ForcaDrawing from "./components/ForcaDrawing";
 import ForcaWord from "./components/ForcaWord";
 import ForcaKeyboard from "./components/ForcaKeyboard";
 import "./App.css";
 
+// Type assertion for the imported JSON
+const categories = wordCategoriesList as WordCategories;
+
 function getWord() {
-	const allWords = Object.values(wordCategoriesList).flat();
+	const allWords = Object.values(categories).flat();
 	const randomIndex = Math.floor(Math.random() * allWords.length);
 	return allWords[randomIndex].toUpperCase();
 }
@@ -25,7 +29,7 @@ function App() {
 	const isLoser = incorrectLetters.length >= 6; // Maximum of 6 incorrect guesses
 	const isWinner = wordToGuess
 		.split("")
-		.every((letter) => guessedLetters.includes(letter));
+		.every((letter: string) => guessedLetters.includes(letter));
 
 	useEffect(() => {
 		if (isWinner) alert("Parabéns! Você ganhou!");
@@ -39,13 +43,14 @@ function App() {
 		[guessedLetters, isWinner, isLoser]
 	);
 
-	const wordCategory = (randomWord: string) => {
-		return Object.keys(wordCategoriesList).find((category) =>
-			wordCategoriesList[category].includes(randomWord.toLowerCase())
+	const wordCategory = (randomWord: string): string => {
+		const category = Object.keys(categories).find((category) =>
+			categories[category as keyof WordCategories].includes(randomWord.toLowerCase())
 		);
+		return category ? category.toUpperCase() : "UNKNOWN";
 	};
 
-	const currentWordCategory = wordCategory(wordToGuess).toUpperCase();
+	const currentWordCategory = wordCategory(wordToGuess);
 
 	// Add a listener for keyboard events
 	useEffect(() => {
@@ -60,7 +65,7 @@ function App() {
 		return () => {
 			document.removeEventListener("keypress", handler);
 		};
-	}, [guessedLetters]);
+	}, [guessedLetters, addGuessedLetter]);
 
 	useEffect(() => {
 		const handler = (e: KeyboardEvent) => {
