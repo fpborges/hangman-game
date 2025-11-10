@@ -9,25 +9,37 @@ import "./App.css";
 // Type assertion for the imported JSON
 const categories = wordCategoriesList as WordCategories;
 
-function getWord() {
-	const allWords = Object.values(categories).flat();
-	const randomIndex = Math.floor(Math.random() * allWords.length);
-	return allWords[randomIndex].toUpperCase();
+function getWordAndCategory(): [string, string] {
+	// Get random category first
+	const categoryKeys = Object.keys(categories) as (keyof WordCategories)[];
+	const randomCategory =
+		categoryKeys[Math.floor(Math.random() * categoryKeys.length)];
+
+	// Get random word from that category
+	const wordsInCategory = categories[randomCategory];
+	const randomWord =
+		wordsInCategory[Math.floor(Math.random() * wordsInCategory.length)];
+
+	return [randomWord.toUpperCase(), randomCategory.toUpperCase()];
 }
 
 function App() {
-	const [wordToGuess, setWordToGuess] = useState(() => {
-		// Select a random word at the start of the game
-		return getWord();
+	const [gameState, setGameState] = useState(() => {
+		// Select a random word and its category at the start of the game
+		const [word, category] = getWordAndCategory();
+		return {
+			wordToGuess: word,
+			category: category,
+		};
 	});
 
 	const [guessedLetters, setGuessedLetters] = useState<string[]>([]); // Letters guessed by the player
 	const incorrectLetters = guessedLetters.filter(
-		(letter) => !wordToGuess.includes(letter)
+		(letter) => !gameState.wordToGuess.includes(letter)
 	);
 
 	const isLoser = incorrectLetters.length >= 6; // Maximum of 6 incorrect guesses
-	const isWinner = wordToGuess
+	const isWinner = gameState.wordToGuess
 		.split("")
 		.every((letter: string) => guessedLetters.includes(letter));
 
@@ -43,14 +55,7 @@ function App() {
 		[guessedLetters, isWinner, isLoser]
 	);
 
-	const wordCategory = (randomWord: string): string => {
-		const category = Object.keys(categories).find((category) =>
-			categories[category as keyof WordCategories].includes(randomWord.toLowerCase())
-		);
-		return category ? category.toUpperCase() : "UNKNOWN";
-	};
-
-	const currentWordCategory = wordCategory(wordToGuess);
+	const [showTip, setShowTip] = useState(false);
 
 	// Add a listener for keyboard events
 	useEffect(() => {
@@ -72,8 +77,9 @@ function App() {
 			const key = e.key;
 			if (key !== "Enter") return;
 			e.preventDefault();
+			const [newWord, newCategory] = getWordAndCategory();
+			setGameState({ wordToGuess: newWord, category: newCategory });
 			setGuessedLetters([]);
-			setWordToGuess(getWord());
 		};
 		document.addEventListener("keypress", handler);
 
@@ -101,14 +107,36 @@ function App() {
 							Press a keyboard key to guess a letter
 							<p>
 								The word category is:
-								<strong> {currentWordCategory}</strong>
+								<strong> {gameState.category}</strong>
 							</p>
 						</div>
 					)}
 				</div>
 				<div style={{ fontSize: "2rem", textAlign: "center" }}>
 					{isWinner && "Parabéns! Você ganhou!"}
-					{isLoser && `Que pena! A palavra era: ${wordToGuess}`}
+					{isLoser && `Que pena! A palavra era: ${gameState.wordToGuess}`}
+				</div>
+				<div style={{ fontSize: "1.5rem", textAlign: "center" }}>
+					<button
+						style={{
+							backgroundColor: "#2583ffff",
+							color: "white",
+							padding: "10px 20px",
+							border: "none",
+							borderRadius: "5px",
+							cursor: "pointer",
+						}}
+						onClick={() => {
+							setShowTip(!showTip);
+						}}
+					>
+						{showTip ? "Hide Tip" : "Get a tip"}
+					</button>
+					{showTip && (
+						<span className="givetip" style={{ marginLeft: "10px" }}>
+							(Tip: {gameState.category})
+						</span>
+					)}
 				</div>
 				<div style={{ fontSize: "1.5rem", textAlign: "center" }}>
 					<button
@@ -121,8 +149,10 @@ function App() {
 							cursor: "pointer",
 						}}
 						onClick={() => {
+							setShowTip(false);
+							const [newWord, newCategory] = getWordAndCategory();
+							setGameState({ wordToGuess: newWord, category: newCategory });
 							setGuessedLetters([]);
-							setWordToGuess(getWord());
 						}}
 					>
 						Play New Game or Press Enter
@@ -131,14 +161,14 @@ function App() {
 				<ForcaDrawing numberOfGuesses={incorrectLetters.length} />
 				<ForcaWord
 					reveal={isLoser}
-					wordToGuess={wordToGuess}
+					wordToGuess={gameState.wordToGuess}
 					guessedLetters={guessedLetters}
 				/>
 				<div style={{ alignSelf: "stretch" }}>
 					<ForcaKeyboard
 						disabled={isWinner || isLoser}
 						activeLetters={guessedLetters.filter((letter) =>
-							wordToGuess.includes(letter)
+							gameState.wordToGuess.includes(letter)
 						)}
 						inactiveLetters={incorrectLetters}
 						addGuessedLetter={addGuessedLetter}
